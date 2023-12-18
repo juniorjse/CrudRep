@@ -19,27 +19,29 @@ const ModalCrud = ({ data, setData, dataEdit, isOpen, onClose }) => {
   const [nome, setNome] = useState(dataEdit.nome || "");
   const [descricao, setDescricao] = useState(dataEdit.descricao || "");
   const [valor, setValor] = useState(dataEdit.valor || "");
-  const [quantidade, setQuantidade] = useState(dataEdit.quantidade || "");
 
   const handleSave = () => {
-    if (!nome || !codigo || !descricao || !valor || !quantidade) return;
-
+    if (!nome || !codigo || !descricao || !valor) return;
+  
     if (codigoAlreadyExists()) {
       return alert("Código já cadastrado!");
     }
-
+  
+    const newItem = { codigo, nome, descricao, valor };
+  
+    let newDataArray;
     if (Object.keys(dataEdit).length) {
-      data[dataEdit.index] = { codigo, nome, descricao, valor, quantidade };
+      // Atualiza o item existente
+      newDataArray = data.map((item) =>
+        item.codigo === dataEdit.codigo ? newItem : item
+      );
+    } else {
+      // Adiciona um novo item
+      newDataArray = [...(data || []), newItem];
     }
-
-    const newDataArray = !Object.keys(dataEdit).length
-      ? [...(data ? data : []), { codigo, nome,  descricao, valor, quantidade  }]
-      : [...(data ? data : [])];
-
+  
     localStorage.setItem("cadastra_prod", JSON.stringify(newDataArray));
-
     setData(newDataArray);
-
     onClose();
   };
 
@@ -92,14 +94,7 @@ const ModalCrud = ({ data, setData, dataEdit, isOpen, onClose }) => {
                   onChange={(e) => setValor(e.target.value)}
                 />
               </Box>
-              <Box>
-                <FormLabel>Quantidade</FormLabel>
-                <Input
-                  type="quantidade"
-                  value={quantidade}
-                  onChange={(e) => setQuantidade(e.target.value)}
-                />
-              </Box>
+
             </FormControl>
           </ModalBody>
 

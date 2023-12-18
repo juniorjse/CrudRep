@@ -10,7 +10,8 @@ import {
   Th,
   Tbody,
   Td,
-  useBreakpointValue,
+  Heading,
+  IconButton,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import ModalCrud from "./components/ModalCrud";
@@ -20,102 +21,92 @@ const App = () => {
   const [data, setData] = useState([]);
   const [dataEdit, setDataEdit] = useState({});
 
-  const isMobile = useBreakpointValue({
-    base: true,
-    lg: false,
-  });
-
   useEffect(() => {
-    const db_costumer = localStorage.getItem("cadastra_prod")
+    const db_customer = localStorage.getItem("cadastra_prod")
       ? JSON.parse(localStorage.getItem("cadastra_prod"))
       : [];
+    setData(db_customer);
+  }, []);
 
-    setData(db_costumer);
-  }, [setData]);
+  const handleEdit = (item) => {
+    setDataEdit(item);
+    onOpen();
+  };
 
   const handleRemove = (codigo) => {
     const newArray = data.filter((item) => item.codigo !== codigo);
-
     setData(newArray);
-
     localStorage.setItem("cadastra_prod", JSON.stringify(newArray));
   };
 
   return (
     <Flex
-      h="100vh"
+      direction="column"
       align="center"
-      justify="center"
-      fontSize="20px"
-      fontFamily="poppins"
+      w="100%"
+      minH="100vh"
+      p={4}
+      fontFamily="Poppins, sans-serif"
+      bg="gray.50"
     >
-      <Box maxW={800} w="100%" h="100vh" py={10} px={2}>
-        <Button colorScheme="blue" onClick={() => [setDataEdit({}), onOpen()]}>
-          Cadastrar produto
-        </Button>
+      <Heading as="h1" size="xl" my={6}>
+        Nunes Sports
+      </Heading>
 
-        <Box overflowY="auto" height="100%">
-          <Table mt="6">
-            <Thead>
-              <Tr>
-                <Th maxW={isMobile ? 5 : 100} fontSize="20px">
-                  Código
-                </Th>
-                <Th maxW={isMobile ? 5 : 100} fontSize="20px">
-                  Nome
-                </Th>
-                <Th maxW={isMobile ? 5 : 100} fontSize="20px">
-                  Descrição
-                </Th>
-                <Th maxW={isMobile ? 5 : 100} fontSize="20px">
-                  Valor
-                </Th>
-                <Th maxW={isMobile ? 5 : 100} fontSize="20px">
-                  Quantidade
-                </Th>
-                <Th p={0}></Th>
-                <Th p={0}></Th>
+      <Button colorScheme="blue" onClick={() => { setDataEdit({}); onOpen(); }} my={4}>
+        Cadastrar produto
+      </Button>
+
+      <Box width={["95%", "80%", "800px"]} overflowX="auto" boxShadow="md" bg="white" p={6} borderRadius="md">
+        <Table mt={4} size="sm">
+          <Thead>
+            <Tr>
+              <Th>Código</Th>
+              <Th>Nome</Th>
+              <Th>Descrição</Th>
+              <Th>Valor</Th>
+              <Th>Ações</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {data.map((item) => (
+              <Tr key={item.codigo}>
+                <Td>{item.codigo}</Td>
+                <Td>{item.nome}</Td>
+                <Td style={{ maxWidth: "150px", overflowY: "auto" }}>
+                  {item.descricao}
+                </Td>
+                <Td>{item.valor}</Td>
+                <Td>
+                  <IconButton
+                    icon={<EditIcon />}
+                    onClick={() => handleEdit(item)}
+                    aria-label="Editar produto"
+                    size="sm"
+                    mr={2}
+                  />
+                  <IconButton
+                    icon={<DeleteIcon />}
+                    onClick={() => handleRemove(item.codigo)}
+                    aria-label="Remover produto"
+                    size="sm"
+                    colorScheme="red"
+                  />
+                </Td>
               </Tr>
-            </Thead>
-            <Tbody>
-              {data.map(({ codigo, nome, descricao, valor, quantidade }, index) => (
-                <Tr key={index} cursor="pointer" _hover={{ bg: "gray.100" }}>
-                  <Td maxW={isMobile ? 5 : 100}>{codigo}</Td>
-                  <Td maxW={isMobile ? 5 : 100}>{nome}</Td>
-                  <Td maxW={isMobile ? 5 : 100}>{descricao}</Td>
-                  <Td maxW={isMobile ? 5 : 100}>{valor}</Td>
-                  <Td maxW={isMobile ? 5 : 100}>{quantidade}</Td>
-                  <Td p={0}>
-                    <EditIcon
-                      fontSize={20}
-                      onClick={() => [
-                        setDataEdit({ codigo, nome, descricao, valor, quantidade, index }),
-                        onOpen(),
-                      ]}
-                    />
-                  </Td>
-                  <Td p={0}>
-                    <DeleteIcon
-                      fontSize={20}
-                      onClick={() => handleRemove(codigo)}
-                    />
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </Box>
-
+            ))}
+          </Tbody>
+        </Table>
       </Box>
       {isOpen && (
         <ModalCrud
-          isOpen={isOpen}
-          onClose={onClose}
-          data={data}
-          setData={setData}
-          dataEdit={dataEdit}
-          setDataEdit={setDataEdit}
-        />
+        isOpen={isOpen}
+        onClose={onClose}
+        data={data}
+        setData={setData}
+        dataEdit={dataEdit}
+        setDataEdit={setDataEdit}
+      />
       )}
     </Flex>
   );
